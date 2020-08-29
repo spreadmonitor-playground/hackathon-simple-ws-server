@@ -1,14 +1,17 @@
 import { createServer } from 'http';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import * as SocketIO from 'socket.io';
 
 import { connectionOptions } from './constants';
 import { LobbyHandler } from './lobby-handler.class';
 
+const playgroundFile: Buffer = readFileSync(join(__dirname, 'playground.html'));
+
 /** We need to add a basic HTTP server so HEROKU doesn't freak out when serving the base page. */
 const httpServer = createServer((req, res) => {
-  console.log(req.url === '/');
   res.statusCode = req.url === '/' ? 200 : 404;
-  res.end('Nothing to see here.');
+  res.end(playgroundFile, 'utf-8');
 });
 const socketServer = SocketIO(httpServer, connectionOptions);
 

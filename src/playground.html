@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<!-- 
+    NOTE: THIS FILE IS HACKED TOGETHER AS AN EXAMPLE, THIS IS NOT OUR STANDARD 
+    QUALITY IN DEVELOPMENT.
+  -->
+
+<head>
+  <meta charset="utf-8">
+  <title>Simple WS Test Tool</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+  <script src="https://unpkg.com/socket.io-client@2.3.0/dist/socket.io.dev.js"></script>
+
+  <style>
+    body {
+      margin: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 class="ui header">Simple WS Test Tool</h1>
+  <p>You can use this simple page to test your server behavior.</p>
+  <div id="error-container">
+  </div>
+  <div class="ui form">
+    <div class="field">
+      <div class="fields">
+        <div class="four wide field">
+          <label for="command">Command</label>
+          <select name="command" id="command">
+            <option value="">Choose a command</option>
+            <optgroup label="Lobby commands">
+              <option disabled=true value="lobby::state-changed">lobby::state-changed</option>
+              <option value="lobby::create-room">lobby::create-room</option>
+              <option value="lobby::join-room">lobby::join-room</option>
+              <option value="lobby::leave-room">lobby::leave-room</option>
+              <option value="lobby::start-game">lobby::start-game</option>
+              <option value="lobby::destroy-game">lobby::destroy-game</option>
+            </optgroup>
+            <optgroup label="Game room commands">
+              <option value="room::current">room::current</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="four wide field">
+          <label>&nbsp;</label>
+          <button id="send" class="ui primary button emit-button">
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="fields">
+        <div class="eight wide field">
+          <label>Request</label>
+          <textarea id="request-text"
+            rows="24">{ "type": "my-game-type", "name": "My game", "maxAllowedParticipants": 5 }</textarea>
+        </div>
+        <div class="eight wide field">
+          <label>Response</label>
+          <textarea id="response-text" rows="24"></textarea>
+        </div>
+      </div>
+    </div>
+    <script>
+      // const socket = io('ws://localhost:3000', { transports: ['websocket'] });
+      const socket = io({ transports: ['websocket'] });
+
+      function showError(message, timeout = 5) {
+        const errorContainer = document.getElementById('error-container');
+        errorContainer.innerHTML = `
+        <div class="ui message red">
+          <div class="header">Server returned an error:</div>
+          <p>${message} (This message disappears in ${timeout} seconds.)</p>
+        </div>
+      `
+
+        window.setTimeout(() => errorContainer.innerHTML = '', timeout * 1000);
+      }
+
+      function sendCommand() {
+        const commandDropdown = document.getElementById('command');
+        const dropdownValue = commandDropdown.options[commandDropdown.selectedIndex].value;
+        const requestPayloadText = document.getElementById('request-text').value;
+
+        if (dropdownValue === '') {
+          showError(`Select a command first!`);
+        }
+
+        try {
+          const payloadJson = JSON.parse(requestPayloadText === '' ? null : requestPayloadText);
+          socket.emit(dropdownValue, payloadJson);
+        } catch (e) {
+          showError(`Cannot send request: ${e.message}.`);
+        }
+
+      }
+
+      document.getElementById('send').addEventListener('click', sendCommand)
+
+      socket.on('error::general', error => showError(error.message));
+      socket.on('lobby::state-changed', statChange => {
+        document.getElementById('response-text').innerHTML = JSON.stringify(statChange, null, 2);
+      });
+    </script>
+</body>
+</html>
