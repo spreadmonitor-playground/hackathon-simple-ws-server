@@ -1,6 +1,6 @@
 import * as SocketIO from 'socket.io';
 
-import { LobbyMessageTypes } from './enums';
+import { GameRoomMessageTypes, LobbyMessageTypes } from './enums';
 import { GameRoom } from './interfaces';
 import { IdentifierPayload } from './interfaces/payloads';
 import { BasePayloadInterface } from './interfaces/payloads/base-payload.interface';
@@ -31,6 +31,8 @@ export class LobbyHandler {
       this.createRoomHandler(socket);
       this.startGameHandler(socket);
       this.destroyGameHandler(socket);
+
+      this.emitToCurrentRoom(socket);
 
       /**
        * When someone leaves we need to remove him/her from all rooms and
@@ -154,6 +156,20 @@ export class LobbyHandler {
   private destroyGameHandler(socket: SocketIO.Socket): void {
     socket.on(LobbyMessageTypes.DestroyGame, () => {
       emitErrorMessage(socket, `The ${LobbyMessageTypes.DestroyGame} command is not supported currently`);
+    });
+  }
+
+  /**
+   * Emits the received message to all members in the same room as the socket.
+   * @param socket the socket of the user
+   */
+  private emitToCurrentRoom(socket: SocketIO.Socket): void {
+    socket.on(GameRoomMessageTypes.CurrentRoom, (payload: any) => {
+      const roomId = this.findEnteredRoom(socket);
+
+      if (roomId) {
+        socket.to(roomId).emit(payload);
+      }
     });
   }
 
