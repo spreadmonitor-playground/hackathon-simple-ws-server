@@ -1,16 +1,18 @@
 name: CD
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - develop
 jobs:
   publish:
-    name: Publish to NPM
+    name: Release to Heroku
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
+      - uses: actions/setup-ruby@v1
         with:
-          registry-url: https://registry.npmjs.org
+          ruby-version: '2.6'
       - run: npm ci --ignore-scripts
       - run: npm run prettier:check
       - run: npm run lint:check
@@ -18,7 +20,8 @@ jobs:
       - run: npm run build
       - run: cp LICENSE build/LICENSE
       - run: cp README.md build/README.md
+      - run: cp Procfile build/Procfile
       - run: jq 'del(.devDependencies) | del(.scripts)' package.json > build/package.json
-      - run: npm publish ./build
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+      - run: gem install dpl --pre
+      - run: cd build
+      - run: dpl heroku api --strategy api --app sm-hackathon-simple-ws-server --api_key ${{ secrets.HEROKU_DEPLOYMENT_KEY }}
