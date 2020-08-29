@@ -171,11 +171,11 @@ export class LobbyHandler {
    * @param socket the socket of the user
    */
   private emitToCurrentRoom(socket: SocketIO.Socket): void {
-    socket.on(GameRoomMessageTypes.CurrentRoom, (payload: any) => {
+    socket.on(GameRoomMessageTypes.CurrentRoom, (payload: unknown) => {
       const roomId = this.findEnteredRoom(socket);
 
       if (roomId) {
-        socket.to(roomId).emit(payload);
+        socket.to(roomId).emit('broadcast', payload);
       }
     });
   }
