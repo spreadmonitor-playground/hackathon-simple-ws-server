@@ -20,7 +20,7 @@ jobs:
       - run: npm run build
       - run: cp LICENSE build/LICENSE
       - run: cp README.md build/README.md
-      - run: cp playground.html build/playground.html
+      - run: cp src/playground.html build/playground.html
       - run: cp Procfile build/Procfile
       - run: jq 'del(.devDependencies) | del(.scripts)' package.json > build/package.json
       - run: gem install dpl --pre
