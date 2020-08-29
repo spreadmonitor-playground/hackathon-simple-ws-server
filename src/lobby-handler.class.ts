@@ -1,4 +1,3 @@
-import { exists } from 'fs';
 import * as SocketIO from 'socket.io';
 
 import { LobbyMessageTypes } from './enums';
