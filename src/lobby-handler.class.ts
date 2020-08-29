@@ -42,6 +42,10 @@ export class LobbyHandler {
         console.log(`Someone left the server as Socket#${socket.id}. Cleaning up resources.`);
 
         this.removeFromAllRooms(socket);
+
+        /** Emit the new lobby state to all users. */
+        this.emitLobbyStateChange(this.server);
+
         socket.removeAllListeners();
       });
     });
@@ -108,7 +112,7 @@ export class LobbyHandler {
 
       // TODO: add proper scalable payload verification
       if (
-        typeof payload.name !== 'string' ||
+        typeof payload.type !== 'string' ||
         typeof payload.name !== 'string' ||
         typeof payload.maxAllowedParticipants !== 'number'
       ) {
@@ -150,6 +154,9 @@ export class LobbyHandler {
       }
 
       this.gameRooms[roomId].currentlyRunning = true;
+
+      /** Emit the new lobby state to all users. */
+      this.emitLobbyStateChange(this.server);
     });
   }
 
