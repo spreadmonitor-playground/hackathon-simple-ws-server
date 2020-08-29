@@ -24,4 +24,4 @@ jobs:
       - run: jq 'del(.devDependencies) | del(.scripts)' package.json > build/package.json
       - run: gem install dpl --pre
       - run: cd build
-      - run: dpl heroku api --strategy api --app sm-hackathon-simple-ws-server --api_key ${{ secrets.HEROKU_DEPLOYMENT_KEY }}
+      - run: dpl heroku --strategy api --app sm-hackathon-simple-ws-server --api_key ${{ secrets.HEROKU_DEPLOYMENT_KEY }} --skip-cleanup
