@@ -28,7 +28,7 @@
     "*.ts": "prettier --parser typescript --write"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^26.0.24",
     "@types/node": "16.0.0",
     "@types/socket.io": "^2.1.13",
     "@typescript-eslint/eslint-plugin": "^4.28.2",
